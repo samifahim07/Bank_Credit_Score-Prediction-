@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CreditIQ — Credit Score Classifier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0A0F1E;
+      --surface:   #111827;
+      --surface2:  #1a2235;
+      --border:    #1f2d45;
+      --blue:      #1D4ED8;
+      --blue-glow: #3B6FFF;
+      --green:     #10B981;
+      --red:       #EF4444;
+      --amber:     #F59E0B;
+      --text:      #E2E8F0;
+      --muted:     #6B7280;
+      --radius:    12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      padding: 28px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #0d1526 0%, transparent 100%);
+    }
+
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: var(--blue);
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 18px;
+      color: #fff;
+      box-shadow: 0 0 24px rgba(29,78,216,0.45);
+    }
+
+    .logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span { color: var(--blue-glow); }
+
+    .header-badge {
+      margin-left: auto;
+      font-size: 12px; font-weight: 500;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 12px; border-radius: 20px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 52px 24px 36px;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--blue-glow);
+      background: rgba(59,111,255,0.1);
+      border: 1px solid rgba(59,111,255,0.25);
+      padding: 5px 14px; border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, #3B6FFF 0%, #10B981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto;
+      font-size: 15px;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .form-section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 580px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 12px; font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    input, select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+      appearance: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--blue-glow);
+      box-shadow: 0 0 0 3px rgba(59,111,255,0.15);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' viewBox='0 0 12 8'%3E%3Cpath stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    select option { background: #1a2235; }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-predict {
+      width: 100%;
+      padding: 14px;
+      background: var(--blue);
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px; font-weight: 600;
+      border: none; border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 20px rgba(29,78,216,0.35);
+    }
+
+    .btn-predict:hover { background: #1e40af; box-shadow: 0 6px 28px rgba(29,78,216,0.5); }
+    .btn-predict:active { transform: scale(0.98); }
+    .btn-predict:disabled { background: #1f2d45; color: var(--muted); cursor: not-allowed; box-shadow: none; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESULT PANEL ── */
+    .result-panel {
+      position: sticky;
+      top: 24px;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      min-height: 320px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      transition: border-color 0.4s;
+    }
+
+    .result-card.good    { border-color: var(--green); box-shadow: 0 0 40px rgba(16,185,129,0.12); }
+    .result-card.poor    { border-color: var(--red);   box-shadow: 0 0 40px rgba(239,68,68,0.12);  }
+    .result-card.standard{ border-color: var(--amber); box-shadow: 0 0 40px rgba(245,158,11,0.12); }
+
+    .result-placeholder {
+      color: var(--muted);
+      display: flex; flex-direction: column;
+      align-items: center; gap: 14px;
+    }
+
+    .result-placeholder svg { opacity: 0.3; }
+
+    /* ── SCORE METER ── */
+    .meter-wrap { position: relative; width: 160px; height: 90px; margin-bottom: 8px; }
+
+    .meter-wrap svg { overflow: visible; }
+
+    .meter-label {
+      position: absolute;
+      bottom: -4px; left: 50%; transform: translateX(-50%);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 36px; font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .score-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 18px; border-radius: 24px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .score-badge.good     { background: rgba(16,185,129,0.12); color: var(--green); }
+    .score-badge.poor     { background: rgba(239,68,68,0.12);  color: var(--red);   }
+    .score-badge.standard { background: rgba(245,158,11,0.12); color: var(--amber); }
+
+    .confidence-label {
+      font-size: 13px; color: var(--muted); margin-bottom: 20px;
+    }
+
+    /* ── PROB BARS ── */
+    .prob-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+
+    .prob-row { display: flex; align-items: center; gap: 10px; }
+
+    .prob-name {
+      width: 68px; text-align: right;
+      font-size: 12px; font-weight: 500;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px;
+    }
+
+    .prob-bar-wrap {
+      flex: 1; height: 8px;
+      background: var(--surface2);
+      border-radius: 4px; overflow: hidden;
+    }
+
+    .prob-bar {
+      height: 100%; border-radius: 4px;
+      transition: width 0.8s cubic-bezier(.16,1,.3,1);
+    }
+
+    .prob-bar.good     { background: var(--green); }
+    .prob-bar.poor     { background: var(--red);   }
+    .prob-bar.standard { background: var(--amber); }
+
+    .prob-pct {
+      width: 40px; text-align: left;
+      font-size: 12px; font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── API STATUS ── */
+    .api-status {
+      margin-top: 16px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex; align-items: center; gap: 8px;
+      word-break: break-all;
+    }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--muted);
+    }
+
+    .dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+    /* ── ERROR TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: #1f0a0a;
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      max-width: 340px;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── RESULT ANIMATION ── */
+    .result-content {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo-icon">C</div>
+  <span class="logo-text">Credit<span>IQ</span></span>
+  <span class="header-badge">CatBoost · v1.0</span>
+</header>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-eyebrow">ML-Powered Credit Analysis</div>
+  <h1>Predict Credit Score<br><em>Instantly &amp; Accurately</em></h1>
+  <p>Fill in customer financial data below and get a real-time <strong>Good / Poor / Standard</strong> credit score prediction powered by CatBoost.</p>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="container">
+
+  <!-- FORM -->
+  <div class="form-card">
+    <p class="form-section-title">Personal &amp; Financial Info</p>
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Age</label>
+        <input type="number" id="Age" placeholder="e.g. 28" min="18" max="100" value="28"/>
+      </div>
+
+      <div class="field">
+        <label>Occupation</label>
+        <select id="Occupation">
+          <option>Scientist</option><option>Engineer</option><option>Teacher</option>
+          <option>Doctor</option><option>Lawyer</option><option>Manager</option>
+          <option>Accountant</option><option>Journalist</option><option>Musician</option>
+          <option>Mechanic</option><option>Entrepreneur</option><option>Writer</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Annual Income ($)</label>
+        <input type="number" id="Annual_Income" placeholder="e.g. 60000" value="60000"/>
+      </div>
+
+      <div class="field">
+        <label>Monthly Inhand Salary ($)</label>
+        <input type="number" id="Monthly_Inhand_Salary" placeholder="e.g. 4500" value="4500"/>
+      </div>
+
+      <div class="field">
+        <label>Num Bank Accounts</label>
+        <input type="number" id="Num_Bank_Accounts" placeholder="e.g. 3" value="3"/>
+      </div>
+
+      <div class="field">
+        <label>Num Credit Cards</label>
+        <input type="number" id="Num_Credit_Card" placeholder="e.g. 2" value="2"/>
+      </div>
+
+      <div class="field">
+        <label>Interest Rate (%)</label>
+        <input type="number" id="Interest_Rate" placeholder="e.g. 14" value="14"/>
+      </div>
+
+      <div class="field">
+        <label>Num of Loans</label>
+        <input type="number" id="Num_of_Loan" placeholder="e.g. 2" value="2"/>
+      </div>
+
+      <div class="field full">
+        <label>Type of Loan</label>
+        <select id="Type_of_Loan">
+          <option>Auto Loan</option><option>Credit-Builder Loan</option>
+          <option>Home Equity Loan</option><option>Mortgage Loan</option>
+          <option>Not Specified</option><option>Payday Loan</option>
+          <option>Personal Loan</option><option>Student Loan</option>
+        </select>
+      </div>
+
+    </div>
+
+    <p class="form-section-title">Payment &amp; Credit History</p>
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Delay from Due Date (days)</label>
+        <input type="number" id="Delay_from_due_date" placeholder="e.g. 5" value="5"/>
+      </div>
+
+      <div class="field">
+        <label>Num Delayed Payments</label>
+        <input type="number" id="Num_of_Delayed_Payment" placeholder="e.g. 2" value="2"/>
+      </div>
+
+      <div class="field">
+        <label>Changed Credit Limit</label>
+        <input type="number" id="Changed_Credit_Limit" placeholder="e.g. 0.5" step="0.01" value="0.5"/>
+      </div>
+
+      <div class="field">
+        <label>Num Credit Inquiries</label>
+        <input type="number" id="Num_Credit_Inquiries" placeholder="e.g. 1" value="1"/>
+      </div>
+
+      <div class="field">
+        <label>Credit Mix</label>
+        <select id="Credit_Mix">
+          <option>Good</option><option>Standard</option><option>Bad</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Outstanding Debt ($)</label>
+        <input type="number" id="Outstanding_Debt" placeholder="e.g. 1200" value="1200"/>
+      </div>
+
+      <div class="field">
+        <label>Credit Utilization Ratio (%)</label>
+        <input type="number" id="Credit_Utilization_Ratio" placeholder="e.g. 28.5" step="0.1" value="28.5"/>
+      </div>
+
+      <div class="field">
+        <label>Credit History Age</label>
+        <input type="text" id="Credit_History_Age" placeholder="e.g. 3 Years and 6 Months" value="3 Years and 6 Months"/>
+      </div>
+
+      <div class="field">
+        <label>Payment of Min Amount</label>
+        <select id="Payment_of_Min_Amount">
+          <option>Yes</option><option>No</option><option>NM</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Total EMI / Month ($)</label>
+        <input type="number" id="Total_EMI_per_month" placeholder="e.g. 450" value="450"/>
+      </div>
+
+      <div class="field">
+        <label>Amount Invested Monthly ($)</label>
+        <input type="number" id="Amount_invested_monthly" placeholder="e.g. 200" value="200"/>
+      </div>
+
+      <div class="field">
+        <label>Payment Behaviour</label>
+        <select id="Payment_Behaviour">
+          <option>High_spent_Small_value_payments</option>
+          <option>High_spent_Medium_value_payments</option>
+          <option>High_spent_Large_value_payments</option>
+          <option>Low_spent_Small_value_payments</option>
+          <option>Low_spent_Medium_value_payments</option>
+          <option>Low_spent_Large_value_payments</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Monthly Balance ($)</label>
+        <input type="number" id="Monthly_Balance" placeholder="e.g. 300" value="300"/>
+      </div>
+
+    </div>
+
+    <button class="btn-predict" onclick="predict()">
+      <span class="spinner" id="spinner"></span>
+      <span id="btn-text">Analyze Credit Score</span>
+    </button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-panel">
+    <div class="result-card" id="resultCard">
+
+      <!-- placeholder -->
+      <div class="result-placeholder" id="placeholder">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <rect x="8" y="16" width="40" height="30" rx="4" stroke="#6B7280" stroke-width="2"/>
+          <path d="M18 28h20M18 34h12" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="28" cy="12" r="4" stroke="#6B7280" stroke-width="2"/>
+        </svg>
+        <span>Fill in the form and click<br><strong>Analyze Credit Score</strong></span>
+      </div>
+
+      <!-- result content -->
+      <div class="result-content" id="resultContent">
+
+        <!-- Arc meter -->
+        <div class="meter-wrap">
+          <svg viewBox="0 0 160 90" width="160" height="90">
+            <!-- track -->
+            <path d="M 16 80 A 64 64 0 0 1 144 80"
+                  fill="none" stroke="#1a2235" stroke-width="12" stroke-linecap="round"/>
+            <!-- fill -->
+            <path id="meterArc" d="M 16 80 A 64 64 0 0 1 144 80"
+                  fill="none" stroke="#10B981" stroke-width="12" stroke-linecap="round"
+                  stroke-dasharray="201" stroke-dashoffset="201"
+                  style="transition: stroke-dashoffset 1s cubic-bezier(.16,1,.3,1), stroke 0.4s"/>
+          </svg>
+          <div class="meter-label" id="meterLabel">—</div>
+        </div>
+
+        <div class="score-badge" id="scoreBadge">—</div>
+        <div class="confidence-label" id="confidenceLabel">—</div>
+
+        <div class="prob-list">
+          <div class="prob-row">
+            <span class="prob-name">Good</span>
+            <div class="prob-bar-wrap"><div class="prob-bar good" id="barGood" style="width:0%"></div></div>
+            <span class="prob-pct" id="pctGood">—</span>
+          </div>
+          <div class="prob-row">
+            <span class="prob-name">Standard</span>
+            <div class="prob-bar-wrap"><div class="prob-bar standard" id="barStandard" style="width:0%"></div></div>
+            <span class="prob-pct" id="pctStandard">—</span>
+          </div>
+          <div class="prob-row">
+            <span class="prob-name">Poor</span>
+            <div class="prob-bar-wrap"><div class="prob-bar poor" id="barPoor" style="width:0%"></div></div>
+            <span class="prob-pct" id="pctPoor">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- API status -->
+    <div class="api-status">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">Checking API at localhost:5000…</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Error toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API_BASE = "http://localhost:5000";
+
+  // ── health check on load
+  (async () => {
+    try {
+      const r = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) });
+      if (r.ok) {
+        document.getElementById("statusDot").classList.add("online");
+        document.getElementById("statusText").textContent = `API online · ${API_BASE}/predict`;
+      } else { throw new Error(); }
+    } catch {
+      document.getElementById("statusText").textContent = `API offline · start app.py first`;
+    }
+  })();
+
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 4000);
+  }
+
+  function getPayload() {
+    const ids = [
+      "Age","Occupation","Annual_Income","Monthly_Inhand_Salary",
+      "Num_Bank_Accounts","Num_Credit_Card","Interest_Rate","Num_of_Loan",
+      "Type_of_Loan","Delay_from_due_date","Num_of_Delayed_Payment",
+      "Changed_Credit_Limit","Num_Credit_Inquiries","Credit_Mix",
+      "Outstanding_Debt","Credit_Utilization_Ratio","Credit_History_Age",
+      "Payment_of_Min_Amount","Total_EMI_per_month","Amount_invested_monthly",
+      "Payment_Behaviour","Monthly_Balance"
+    ];
+    const obj = {};
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      obj[id] = el ? el.value : "";
+    });
+    return obj;
+  }
+
+  // Arc path: sweep from left (16,80) to right (144,80) = 201px arc length (half circle r=64)
+  const ARC_LEN = 201;
+  const SCORE_META = {
+    Good:     { cls: "good",     color: "#10B981", emoji: "✦", short: "G" },
+    Poor:     { cls: "poor",     color: "#EF4444", emoji: "✗", short: "P" },
+    Standard: { cls: "standard", color: "#F59E0B", emoji: "◆", short: "S" },
+  };
+  const FILL_MAP = { Good: 0.85, Standard: 0.52, Poor: 0.2 };
+
+  function showResult(data) {
+    const label  = data.credit_score;   // "Good" / "Poor" / "Standard"
+    const conf   = data.confidence;
+    const probs  = data.probabilities;
+    const meta   = SCORE_META[label] || SCORE_META.Standard;
+
+    // Card border
+    const card = document.getElementById("resultCard");
+    card.className = "result-card " + meta.cls;
+
+    // Hide placeholder, show result
+    document.getElementById("placeholder").style.display = "none";
+    const rc = document.getElementById("resultContent");
+    rc.style.display = "flex";
+    rc.style.animation = "none";
+    void rc.offsetWidth;
+    rc.style.animation = "";
+
+    // Arc meter
+    const arc = document.getElementById("meterArc");
+    const fill = FILL_MAP[label] ?? 0.5;
+    arc.style.stroke = meta.color;
+    setTimeout(() => {
+      arc.style.strokeDashoffset = ARC_LEN * (1 - fill);
+    }, 80);
+    document.getElementById("meterLabel").textContent = meta.short;
+    document.getElementById("meterLabel").style.color = meta.color;
+
+    // Badge
+    const badge = document.getElementById("scoreBadge");
+    badge.className = "score-badge " + meta.cls;
+    badge.textContent = meta.emoji + " " + label;
+
+    // Confidence
+    document.getElementById("confidenceLabel").textContent =
+      `Confidence: ${(conf * 100).toFixed(1)}%`;
+
+    // Probability bars
+    const p = probs;
+    [["Good","barGood","pctGood"],["Standard","barStandard","pctStandard"],["Poor","barPoor","pctPoor"]].forEach(([key, barId, pctId]) => {
+      const val = (p[key] ?? 0) * 100;
+      setTimeout(() => { document.getElementById(barId).style.width = val.toFixed(1) + "%"; }, 100);
+      document.getElementById(pctId).textContent = val.toFixed(1) + "%";
+    });
+  }
+
+  async function predict() {
+    const btn     = document.querySelector(".btn-predict");
+    const spinner = document.getElementById("spinner");
+    const btnText = document.getElementById("btn-text");
+
+    btn.disabled = true;
+    spinner.style.display = "block";
+    btnText.textContent   = "Analyzing…";
+
+    try {
+      const payload = getPayload();
+      const res = await fetch(`${API_BASE}/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15000)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      showResult(data);
+
+    } catch (err) {
+      if (err.name === "TimeoutError") {
+        showToast("Request timed out. Is app.py running?");
+      } else {
+        showToast("Error: " + err.message);
+      }
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = "none";
+      btnText.textContent   = "Analyze Credit Score";
+    }
+  }
+</script>
+</body>
+</html>
