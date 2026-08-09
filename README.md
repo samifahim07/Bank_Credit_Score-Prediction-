@@ -101,13 +101,6 @@ Several classification algorithms were trained and evaluated to determine the be
 
 **CatBoost** was selected as the final model because it achieved the highest test accuracy among the evaluated models.
 
-**Test Accuracy: 77.52%**
-
-The trained CatBoost model was saved as:
-
-```text
-best_model.pkl
-```
 
 ## Model Evaluation
 
